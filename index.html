@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Superpower Parents &amp; Teacher — Interactive App Prototype | Dr. Kate Ellen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #F4F1EC;
+      --card: #FFFFFF;
+      --foreground: #1B2A30;
+      --muted-foreground: #5C6F76;
+      --border: #E2DDD5;
+      --card-border: #E2DDD5;
+      --primary: #1E4E5F;
+      --link: #1E4E5F;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif; }
+    /* Phone mockup & custom subtle scrollbars */
+    .phone-scroll::-webkit-scrollbar { width: 4px; }
+    .phone-scroll::-webkit-scrollbar-track { background: transparent; }
+    .phone-scroll::-webkit-scrollbar-thumb { background: rgba(30, 78, 95, 0.22); border-radius: 999px; }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      70% { transform: scale(1.22); opacity: 0; }
+      100% { transform: scale(1.22); opacity: 0; }
+    }
+    .mic-pulse::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 9999px;
+      border: 2px solid #D96B4F;
+      animation: pulseRing 1.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+
+    @keyframes eqBar {
+      0%, 100% { height: 6px; }
+      50% { height: 22px; }
+    }
+    .eq-bar {
+      width: 3px;
+      border-radius: 999px;
+      background: #F4C095;
+      animation: eqBar 0.7s ease-in-out infinite;
+    }
+    .eq-bar:nth-child(2) { animation-delay: 0.15s; }
+    .eq-bar:nth-child(3) { animation-delay: 0.3s; }
+    .eq-bar:nth-child(4) { animation-delay: 0.45s; }
+    .eq-bar:nth-child(5) { animation-delay: 0.2s; }
+    .paused .eq-bar { animation-play-state: paused; height: 6px; }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 space-y-5">
+    <!-- Top Control Bar -->
+    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl px-5 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="flex items-start sm:items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-white shadow-sm" style="background: linear-gradient(135deg, #1E4E5F 0%, #2D6E7E 100%);">
+          SP
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="text-base sm:text-lg font-semibold tracking-tight text-[var(--foreground)] m-0">
+              Superpower App Prototype
+            </h1>
+            <span class="text-xs font-medium px-2 py-0.5 rounded-md border border-[var(--border)] text-[var(--muted-foreground)]">
+              Dr. Kate Ellen • Investor Demo
+            </span>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)] mt-0.5 m-0">
+            Voice-to-Video Clinical Guidance • AI Script Routing • Child &amp; Student Folders • HeyGen Weekly Pipeline
+          </p>
+        </div>
+      </div>
+
+      <!-- Mode Switcher & View Controls -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="inline-flex p-1 rounded-xl border border-[var(--border)] bg-[var(--background)]" role="tablist" aria-label="App Mode">
+          <button id="btnModeParents" onclick="setAppMode('parents')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+            Superpower Parents
+          </button>
+          <button id="btnModeTeacher" onclick="setAppMode('teacher')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+            Superpower Teacher
+          </button>
+        </div>
+        <button id="btnToggleInspector" onclick="toggleInvestorPanel()" class="px-3 py-2 rounded-xl text-xs font-medium border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--background)] text-[var(--foreground)] transition-colors cursor-pointer">
+          Hide Investor Panel
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace: Interactive Phone + Investor Companion -->
+    <div id="mainGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- LEFT / CENTER: Realistic Interactive Mobile App -->
+      <div id="phoneColumn" class="lg:col-span-5 flex flex-col items-center">
+        <!-- Phone Bezel -->
+        <div class="w-full max-w-[392px] rounded-[42px] p-2.5 shadow-2xl border border-[#2C3E45]" style="background: #141E22;">
+          <!-- Phone Screen (Warm Daylight Clinical Brand Palette) -->
+          <div class="w-full h-[730px] rounded-[34px] overflow-hidden flex flex-col relative" style="background: #FAF8F5; color: #1B2A30;">
+            <!-- iOS Status Bar -->
+            <div class="px-6 pt-3 pb-2 flex items-center justify-between text-[11px] font-semibold shrink-0" style="color: #1E4E5F;">
+              <span>9:41</span>
+              <div class="w-24 h-5 rounded-full bg-[#141E22]"></div>
+              <div class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M2 18h2v-4H2v4zm4 0h2v-7H6v7zm4 0h2V8h-2v10zm4 0h2V5h-2v13zm4 0h2V2h-2v16z"/></svg>
+                <span>100%</span>
+              </div>
+            </div>
+
+            <!-- App Top Header -->
+            <div class="px-4 pb-2.5 flex items-center justify-between border-b shrink-0" style="border-color: #E7E2DA;">
+              <div class="flex items-center gap-2">
+                <div id="appLogoBadge" class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold" style="background: #1E4E5F;">
+                  SP
+                </div>
+                <div>
+                  <div id="appBrandTitle" class="text-sm font-bold leading-tight" style="color: #163A47;">Superpower Parents</div>
+                  <div class="text-[11px]" style="color: #5C6F76;">Dr. Kate Ellen • Clinical Psychologist</div>
+                </div>
+              </div>
+              <button onclick="switchTab('weekly')" title="Weekly Video Release" class="relative p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer">
+                <svg class="w-5 h-5" style="color: #1E4E5F;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                <span class="w-2.5 h-2.5 rounded-full absolute top-1.5 right-1.5 border-2 border-[#FAF8F5]" style="background: #D96B4F;"></span>
+              </button>
+            </div>
+
+            <!-- Scrollable Screen Content -->
+            <div id="phoneViewport" class="flex-1 overflow-y-auto phone-scroll px-4 py-3.5 space-y-4">
+              <!-- Dynamic content rendered by JS -->
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+            <nav class="px-2 py-2 border-t grid grid-cols-4 gap-1 shrink-0" style="background: #FFFFFF; border-color: #E7E2DA;">
+              <button onclick="switchTab('ask')" id="nav-ask" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                <span>Ask Kate</span>
+              </button>
+              <button onclick="switchTab('folders')" id="nav-folders" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                <span id="navFoldersLabel">Children</span>
+              </button>
+              <button onclick="switchTab('weekly')" id="nav-weekly" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Weekly</span>
+              </button>
+              <button onclick="switchTab('plan')" id="nav-plan" class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span>Plan</span>
+              </button>
+            </nav>
+
+            <!-- Toast Notification inside Phone -->
+            <div id="phoneToast" class="hidden absolute bottom-20 left-4 right-4 px-3.5 py-2.5 rounded-xl text-xs font-medium text-white shadow-lg flex items-center justify-between" style="background: #163A47;">
+              <span id="phoneToastText">Saved to folder</span>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-[var(--muted-foreground)] mt-3 text-center max-w-sm">
+          Interactive prototype: tap the mic (or pick a sample issue), watch Dr. Kate's matched 3-min video, download a strategy sheet, and organize by child or student.
+        </p>
+      </div>
+
+      <!-- RIGHT: Investor & AI Architecture Companion Panel -->
+      <div id="investorColumn" class="lg:col-span-7 space-y-4">
+        <!-- Live AI Script Router Inspector -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-3.5">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm font-semibold text-[var(--foreground)] m-0">1. Live AI Script Matcher (Clinical Guardrails)</h2>
+              <p class="text-xs text-[var(--muted-foreground)] mt-0.5 m-0">
+                Instead of letting an LLM hallucinate parenting advice, AI scans Dr. Kate's 70+ clinically vetted scripts to route parents to the exact video &amp; strategy sheet.
+              </p>
+            </div>
+            <span class="text-xs font-mono px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--muted-foreground)] shrink-0">
+              Live Telemetry
+            </span>
+          </div>
+
+          <div id="inspectorOutput" class="rounded-xl border border-[var(--border)] bg-[var(--background)] p-4 space-y-3">
+            <!-- Populated live when user searches/speaks -->
+          </div>
+        </section>
+
+        <!-- HeyGen AI Avatar & Weekly Production Pipeline -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm font-semibold text-[var(--foreground)] m-0">2. HeyGen AI Video Pipeline (Zero Studio / Zero Editors)</h2>
+              <p class="text-xs text-[var(--muted-foreground)] mt-0.5 m-0">
+                How Dr. Kate ships 1 new customer-requested 3-minute video + strategy sheet every week in ~30 minutes.
+              </p>
+            </div>
+            <button onclick="toggleHeygenScriptModal()" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer transition-opacity hover:opacity-90" style="background: #1E4E5F;">
+              View Ready-to-Paste HeyGen Script
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+            <div class="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3">
+              <div class="text-[11px] font-mono text-[var(--muted-foreground)]">STEP 1 • DEMAND</div>
+              <div class="text-xs font-semibold text-[var(--foreground)] mt-1">Customer Feedback</div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1 m-0 leading-relaxed">
+                Unmatched parent voice queries &amp; weekly topic votes surface top demand.
+              </p>
+            </div>
+            <div class="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3">
+              <div class="text-[11px] font-mono text-[var(--muted-foreground)]">STEP 2 • 15 MIN</div>
+              <div class="text-xs font-semibold text-[var(--foreground)] mt-1">Dr. Kate Script</div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1 m-0 leading-relaxed">
+                Dr. Kate writes &amp; approves a concise 3-minute clinical script (~420 words).
+              </p>
+            </div>
+            <div class="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3">
+              <div class="text-[11px] font-mono text-[var(--muted-foreground)]">STEP 3 • 5 MIN</div>
+              <div class="text-xs font-semibold text-[var(--foreground)] mt-1">HeyGen AI Twin</div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1 m-0 leading-relaxed">
+                Script renders in HeyGen using Dr. Kate's trained digital twin—no studio or editor errors.
+              </p>
+            </div>
+            <div class="rounded-xl border border-[var(--border)] bg-[var(--background)] p-3">
+              <div class="text-[11px] font-mono text-[var(--muted-foreground)]">STEP 4 • 10 MIN</div>
+              <div class="text-xs font-semibold text-[var(--foreground)] mt-1">Strategy + Push</div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-1 m-0 leading-relaxed">
+                AI drafts matching checklist &amp; PDF sheet; Dr. Kate verifies &amp; pushes weekly alert.
+              </p>
+            </div>
+          </div>
+
+          <!-- Collapsible Ready-to-Paste HeyGen Script -->
+          <div id="heygenScriptBox" class="hidden rounded-xl border border-[var(--border)] bg-[var(--background)] p-4 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-semibold text-[var(--foreground)]">Sample HeyGen Avatar Script — "After-School Meltdowns" (Est. 2 min 50 sec)</span>
+              <button onclick="copyHeygenScript()" id="btnCopyScript" class="px-2.5 py-1 rounded-md text-xs font-medium border border-[var(--border)] hover:bg-[var(--card)] text-[var(--foreground)] cursor-pointer">
+                Copy Script
+              </button>
+            </div>
+            <pre id="heygenScriptText" class="text-xs text-[var(--muted-foreground)] whitespace-pre-wrap font-sans leading-relaxed m-0 p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] max-h-56 overflow-y-auto">Hi, I'm Dr. Kate Ellen. If your child holds it together all day at school—and the teacher says they're an angel—only for them to explode the moment they get into the car or walk through the front door, please take a deep breath. You are not doing anything wrong.
+
+What you're seeing is something psychologists call after-school restraint collapse. All day long, your child has been using up their nervous system's energy to sit still, follow rules, navigate friendships, and manage sensory noise. By 3:15 PM, their emotional tank is completely empty. And because you are their safe person, they finally let go with you.
+
+Here are three evidence-based strategies you can start today:
+
+First: Create a 20-minute decompression buffer before any questions or chores. Skip "How was your day?" and instead offer a quiet snack, water, and low-demand connection.
+
+Second: Regulate before you educate. When a meltdown hits, the thinking brain is offline. Lower your voice, validate the feeling—"Your day was really big and your body feels overloaded"—and wait until their breathing settles before problem-solving.
+
+Third: Use the downloadable After-School Reset Checklist below this video to spot their early overload cues and build a predictable afternoon rhythm.
+
+Remember: when someone sees beneath the surface, a child's whole world can change. Save this video to your child's folder so you can revisit it anytime.</pre>
+            <p class="text-xs text-[var(--muted-foreground)] m-0">
+              <strong>To generate this in HeyGen:</strong> Record a 2-minute studio-lit consent &amp; training clip of Dr. Kate in <a href="https://app.heygen.com/" target="_blank" class="underline text-[var(--link)]">app.heygen.com</a> (Custom Avatar / Digital Twin), paste the script above, export the `.mp4`, and drop it into this video player slot.
+            </p>
+          </div>
+        </section>
+
+        <!-- Dual Product Synergy & Credentials -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] m-0">Dual-Market Platform</h3>
+            <div class="space-y-2 text-xs text-[var(--foreground)]">
+              <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--background)]">
+                <div class="font-semibold">Superpower Parents (B2C Yearly)</div>
+                <p class="text-[var(--muted-foreground)] mt-0.5 m-0">Direct annual family subscription with per-child folders, voice search, and 52 weekly drops/year.</p>
+              </div>
+              <div class="p-3 rounded-xl border border-[var(--border)] bg-[var(--background)]">
+                <div class="font-semibold">Superpower Teacher (B2B Schools)</div>
+                <p class="text-[var(--muted-foreground)] mt-0.5 m-0">Same engine, tailored for classrooms (ages 5–17) with per-student folders &amp; matching parent alignment.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] m-0">Founder Moat &amp; Credentials</h3>
+            <div class="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--background)] space-y-2 text-xs">
+              <div class="font-semibold text-[var(--foreground)]">Dr. Kate Ellen</div>
+              <ul class="space-y-1 text-[var(--muted-foreground)] pl-4 m-0 list-disc">
+                <li>Doctorate in Clinical Psychology (dual-trained in Psychoanalysis &amp; CBT)</li>
+                <li>Bachelor in Primary &amp; Secondary Teaching (Australia)</li>
+                <li>Former teacher, school psychologist, hospital specialist &amp; elite athlete psychologist</li>
+                <li>70+ proven 3-minute psychoeducation topics already structured with checklists</li>
+              </ul>
+              <p class="italic text-[var(--muted-foreground)] pt-1 border-t border-[var(--border)] m-0">
+                "When someone sees beneath the surface, a child's whole world can change."
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // DATA: Grounded in Dr. Kate Ellen's Superpower Parents & Teacher Programs
+    // =========================================================================
+    const VIDEO_LIBRARY = [
+      {
+        id: "after-school-meltdowns",
+        modes: ["parents", "teacher"],
+        title: "After-School Meltdowns & Restraint Collapse",
+        teacherTitle: "End-of-Day Sensory Overload & Emotional Collapse",
+        duration: "2:54",
+        category: "Emotional Regulation",
+        ageRange: "Ages 5–12",
+        isNewThisWeek: false,
+        keywords: ["meltdown", "after school", "explode", "explosive", "screaming", "tantrum", "crying", "car", "afternoon", "overload", "angel at school", "angry", "tears"],
+        summary: "Why kids who hold it together all day at school explode at home—and the 20-minute decompression buffer that resets their nervous system.",
+        teacherSummary: "Recognizing cognitive and sensory fatigue in the final period and using micro-resets before behavior escalates.",
+        captions: [
+          { time: "0:00", phase: "Beneath the Surface", text: "If your child holds it together all day at school—only to explode the moment they get home—you are not doing anything wrong." },
+          { time: "0:42", phase: "The Psychology", text: "This is called after-school restraint collapse. Their nervous system has spent 6 hours holding back impulses, noise, and social stress." },
+          { time: "1:28", phase: "Strategy 1: Decompression", text: "Create a 20-minute low-demand buffer: snack, water, and quiet connection before asking 'How was your day?' or starting chores." },
+          { time: "2:10", phase: "Strategy 2: Regulate First", text: "When a meltdown hits, the thinking brain is offline. Lower your voice, validate the overload, and problem-solve only once calm." }
+        ],
+        checklist: [
+          "Child behaves well at school but explodes within 20 minutes of coming home",
+          "Small requests (taking off shoes, unpacking bag) trigger big reactions",
+          "Appears physically exhausted, hungry, or overly sensitive to noise",
+          "Feels remorseful or tearful once the emotional storm passes"
+        ],
+        strategies: [
+          "Implement a 20-minute 'No Questions' snack & movement buffer immediately after pickup.",
+          "Use co-regulation phrasing: 'Your day was big and your brain feels full. Let's take 10 minutes to reset.'",
+          "Shift homework and conversations about school to after dinner or during a relaxed side-by-side activity."
+        ]
+      },
+      {
+        id: "screen-battles-teens",
+        modes: ["parents"],
+        title: "Ending Screen Time Battles & Door-Slamming",
+        teacherTitle: "Device Distraction & Classroom Tech Boundaries",
+        duration: "3:05",
+        category: "Tech & Boundaries",
+        ageRange: "Ages 9–17",
+        isNewThisWeek: true,
+        keywords: ["screen", "screens", "phone", "ipad", "gaming", "video games", "youtube", "tiktok", "slam", "defiant", "teen", "teenager", "refuses", "device", "addicted"],
+        summary: "Understand the dopamine drop behind sudden screen rage and use collaborative transition agreements that actually hold.",
+        teacherSummary: "Structuring predictable device transitions to prevent power struggles in secondary classrooms.",
+        captions: [
+          { time: "0:00", phase: "Beneath the Surface", text: "When you ask your child or teen to turn off a screen and they erupt, it's rarely just disrespect—it's a sudden neurochemical cliff." },
+          { time: "0:48", phase: "The Psychology", text: "Games and feeds keep dopamine high and social status active. Abruptly pulling the plug triggers a genuine threat response in the brain." },
+          { time: "1:35", phase: "Strategy 1: Bridge Warnings", text: "Move from abrupt commands to a 2-step bridge: 'Show me where you're up to, and let's agree on the natural pause point in 10 minutes.'" },
+          { time: "2:22", phase: "Strategy 2: Co-Designed Rules", text: "Set clear, predictable tech-free zones during calm times—never negotiate boundaries in the middle of a standoff." }
+        ],
+        checklist: [
+          "Verbal warnings to get off screens escalate into shouting or door-slamming",
+          "Child loses track of time and insists they 'just started'",
+          "Conflict happens most around dinner, homework, or bedtime transitions",
+          "Rules feel inconsistent because enforcing them is exhausting"
+        ],
+        strategies: [
+          "Join their world for 60 seconds ('Show me what you're building') before signaling the transition.",
+          "Use natural stopping points (end of a match/episode) paired with a visible visual timer.",
+          "Create a written Family Tech Rhythm on a calm weekend morning with clear charging stations outside bedrooms."
+        ]
+      },
+      {
+        id: "school-anxiety-refusal",
+        modes: ["parents", "teacher"],
+        title: "Morning Anxiety & School Refusal",
+        teacherTitle: "Supporting Anxious Students at Morning Drop-Off",
+        duration: "3:12",
+        category: "Anxiety & Confidence",
+        ageRange: "Ages 5–16",
+        isNewThisWeek: false,
+        keywords: ["anxiety", "anxious", "worried", "school refusal", "stomach ache", "tummy", "morning", "scared", "panic", "clingy", "won't go to school", "nervous", "fear"],
+        summary: "CBT + attachment-informed steps to validate anxious feelings without accidentally reinforcing avoidance.",
+        teacherSummary: "Warm-handoff routines and safe-base check-ins that help anxious students settle into learning.",
+        captions: [
+          { time: "0:00", phase: "Beneath the Surface", text: "Morning stomach aches, tears at the gate, or pleading to stay home can break a parent's heart—and leave you feeling stuck." },
+          { time: "0:50", phase: "The Psychology", text: "Avoidance brings instant relief, which teaches the anxious brain that school really is dangerous. Reassurance alone rarely breaks the cycle." },
+          { time: "1:40", phase: "Strategy 1: Supportive Confidence", text: "Combine empathy with confidence: 'I can see your tummy feels tight AND I know you can handle the first 10 minutes with Ms. Chen.'" },
+          { time: "2:25", phase: "Strategy 2: Micro-Steps", text: "Prep the night before, keep drop-off brief and predictable, and partner with the teacher for a welcoming arrival job." }
+        ],
+        checklist: [
+          "Frequent physical complaints (stomach aches, headaches) on school mornings",
+          "Seeks repeated reassurance ('What if I feel sick?', 'Will you pick me up?')",
+          "Escalates distress on Sunday evenings or after school holidays",
+          "Settles down once actually inside the classroom for 15–20 minutes"
+        ],
+        strategies: [
+          "Use the Empathy + Confidence formula (avoid rescuing or lecturing).",
+          "Externalize the worry ('Your worry alarm is ringing loud today—let's turn the volume down together').",
+          "Coordinate a 2-minute morning arrival task with the teacher (handing out books, watering plants) to bridge entry."
+        ]
+      },
+      {
+        id: "adhd-focus-homework",
+        modes: ["parents", "teacher"],
+        title: "ADHD, Focus & Homework Battles",
+        teacherTitle: "ADHD Classroom Focus & Executive Function Supports",
+        duration: "2:58",
+        category: "ADHD & Focus",
+        ageRange: "Ages 6–17",
+        isNewThisWeek: false,
+        keywords: ["adhd", "focus", "homework", "distracted", "interrupts", "interrupting", "leaves seat", "fidget", "procrastinate", "executive function", "forgets", "won't start", "shut down"],
+        summary: "Why 'just try harder' backfires for ADHD brains—and how task-chunking and body-doubling unlock momentum.",
+        teacherSummary: "Practical classroom adjustments—chunked instructions, movement jobs, and visual cues—that reduce disruptions.",
+        captions: [
+          { time: "0:00", phase: "Beneath the Surface", text: "When a 20-minute worksheet turns into a 3-hour battle—or a student keeps leaving their seat—it's an executive function bottleneck, not laziness." },
+          { time: "0:46", phase: "The Psychology", text: "ADHD brains struggle with task initiation and working memory. A blank page feels like climbing a mountain without a first foothold." },
+          { time: "1:36", phase: "Strategy 1: Micro-Chunking", text: "Fold the page so only 3 questions are visible. Celebrate starting—not just finishing—with 10-minute focus sprints." },
+          { time: "2:18", phase: "Strategy 2: Body Doubling", text: "Sit nearby doing your own quiet task, or pair a student with a structured movement job before silent work." }
+        ],
+        checklist: [
+          "Avoids starting multi-step tasks even when capable of the work",
+          "Frequently loses track of instructions or interrupts impulsively",
+          "Experiences frustration or shame ('I'm stupid') when overwhelmed",
+          "Performs noticeably better with visual timers or hands-on engagement"
+        ],
+        strategies: [
+          "Use 10-minute visual sprint timers followed by a 3-minute physical movement reset.",
+          "Give one instruction at a time and ask the child/student to echo back the very first step.",
+          "In class: assign purposeful movement roles (delivering notes, handing out sheets) before seated tasks."
+        ]
+      },
+      {
+        id: "asd-transitions-sensory",
+        modes: ["teacher", "parents"],
+        title: "Sensory Overwhelm & Unexpected Transitions",
+        teacherTitle: "ASD & Sensory Overwhelm During Classroom Transitions",
+        duration: "3:02",
+        category: "ASD & Sensory",
+        ageRange: "Ages 5–16",
+        isNewThisWeek: false,
+        keywords: ["sensory", "autism", "asd", "transitions", "noise", "assembly", "routine", "change", "rigid", "ears", "overwhelmed", "meltdown", "shutdown", "classroom"],
+        summary: "How predictability, visual previews, and sensory escape cards prevent overwhelm before it peaks.",
+        teacherSummary: "Structuring calm classroom transitions and discreet sensory reset passes for neurodivergent learners.",
+        captions: [
+          { time: "0:00", phase: "Beneath the Surface", text: "Sudden changes in routine—a relief teacher, a loud bell, or switching activities—can feel physically jarring for a sensory-sensitive child." },
+          { time: "0:45", phase: "The Psychology", text: "Predictability equals safety. When the brain can't anticipate what comes next, the threat system spikes into fight, flight, or shutdown." },
+          { time: "1:32", phase: "Strategy 1: Visual Previews", text: "Give a calm 5-minute and 2-minute visual countdown before transitions, clearly stating what stays the same." },
+          { time: "2:15", phase: "Strategy 2: Discreet Reset Card", text: "Offer a non-verbal '2-Minute Quiet Reset' card so the child can step to a low-stimulation corner before reaching meltdown." }
+        ],
+        checklist: [
+          "Struggles noticeably when plans change or schedules shift unexpectedly",
+          "Covers ears, withdraws, or becomes rigid in noisy or bright spaces",
+          "Needs extra processing time between finishing one task and starting another",
+          "Responds well to visual schedules and clear advance notice"
+        ],
+        strategies: [
+          "Preview any schedule changes at the start of the day using a simple visual Now / Next card.",
+          "Establish a shame-free 'Quiet Reset Pass' that lets the child take 3 minutes in a calm corner.",
+          "Reduce verbal chatter during high-stress transitions—use calm gestures or written cues instead."
+        ]
+      },
+      {
+        id: "defensive-parent-alignment",
+        modes: ["teacher"],
+        title: "Partnering with Defensive or Overwhelmed Parents",
+        teacherTitle: "Turning Tense Parent Meetings into Home-School Alignment",
+        duration: "2:50",
+        category: "Home-School Alignment",
+        ageRange: "Ages 5–17",
+        isNewThisWeek: true,
+        keywords: ["parent", "defensive", "meeting", "email", "blame", "aligned", "home", "communication", "angry parent", "support"],
+        summary: "Psychologically grounded phrasing that lowers parent defensiveness and builds a united team around the student.",
+        teacherSummary: "Start with genuine curiosity and shared strengths so parents feel like allies rather than judged—then share matching Superpower Parent videos.",
+        captions: [
+          { time: "0:00", phase: "Beneath the Surface", text: "When a parent becomes defensive in a meeting, what looks like anger is almost always fear, exhaustion, or shame." },
+          { time: "0:44", phase: "The Psychology", text: "Parents often brace for criticism. Shifting from 'reporting problems' to 'shared detective work' immediately lowers their threat response." },
+          { time: "1:30", phase: "Strategy 1: Lead with Seeing the Child", text: "Open with one specific strength you genuinely notice in their child before describing a single classroom challenge." },
+          { time: "2:12", phase: "Strategy 2: Shared Language", text: "Share the matching 3-minute Superpower Parents video so both home and school use the exact same calm strategy." }
+        ],
+        checklist: [
+          "Parent has previously pushed back or felt their child is being singled out",
+          "Classroom strategies stall because home routines pull in a different direction",
+          "Upcoming parent-teacher conference feels high-stakes or tense",
+          "Want a clear, evidence-based resource to send home after the chat"
+        ],
+        strategies: [
+          "Use the 'Same Side of the Table' opener: 'I really care about Sam thriving this term—I'd love your insight on what works at home.'",
+          "Focus on 1 observable pattern and 1 shared goal rather than a long list of incidents.",
+          "Send the matching 3-minute Superpower Parents video link after the meeting to align home & school."
+        ]
+      }
+    ];
+
+    const SAMPLE_PROMPTS = {
+      parents: [
+        "My 8-year-old has explosive meltdowns every afternoon after school",
+        "My teen refuses to get off screens and slams the bedroom door",
+        "Homework takes 3 hours and ends in tears because he can't focus",
+        "My child has severe stomach aches and anxiety every school morning"
+      ],
+      teacher: [
+        "Year 4 student with ADHD constantly interrupts and leaves his seat",
+        "Student shuts down with sensory overwhelm during noisy transitions",
+        "Anxious student cries at morning drop-off and refuses to enter class",
+        "Parent is defensive in meetings and we need home-school alignment"
+      ]
+    };
+
+    // =========================================================================
+    // APP STATE
+    // =========================================================================
+    let state = {
+      mode: "parents", // "parents" | "teacher"
+      tab: "ask",      // "ask" | "folders" | "weekly" | "plan"
+      activeVideoId: null,
+      activeFolderId: null,
+      query: "",
+      isListening: false,
+      isMatching: false,
+      matchedResults: [],
+      lastMatchTelemetry: null,
+      isPlaying: false,
+      playProgress: 0, // 0 to 100
+      playTimer: null,
+      voiceReadAloud: false,
+      checkedItems: {}, // { videoId: { idx: bool } }
+      showSavePicker: false,
+      folders: {
+        parents: [
+          {
+            id: "child-1",
+            name: "Mia",
+            meta: "Age 8 • Year 3",
+            color: "#1E4E5F",
+            saved: [
+              { videoId: "after-school-meltdowns", note: "20-min snack buffer helped huge on Tuesday!" }
+            ]
+          },
+          {
+            id: "child-2",
+            name: "Leo",
+            meta: "Age 13 • Year 8",
+            color: "#D96B4F",
+            saved: [
+              { videoId: "screen-battles-teens", note: "Agreed on 10-min bridge warning before dinner." }
+            ]
+          }
+        ],
+        teacher: [
+          {
+            id: "student-1",
+            name: "Sam K.",
+            meta: "Year 4 • ADHD Support",
+            color: "#1E4E5F",
+            saved: [
+              { videoId: "adhd-focus-homework", note: "Movement job before silent reading worked well." }
+            ]
+          },
+          {
+            id: "student-2",
+            name: "Chloe R.",
+            meta: "Year 4 • Sensory Profile",
+            color: "#2E7D6B",
+            saved: [
+              { videoId: "asd-transitions-sensory", note: "Introduced discreet Quiet Reset Pass." }
+            ]
+          }
+        ]
+      },
+      weeklyRequests: [
+        { id: 1, topic: "Sibling rivalry & constant fighting in the car", votes: 42, voted: false },
+        { id: 2, topic: "Perfectionism & fear of making mistakes in maths", votes: 37, voted: false },
+        { id: 3, topic: "Helping teens navigate group-chat exclusion", votes: 29, voted: false }
+      ],
+      showInvestorPanel: true
+    };
+
+    // =========================================================================
+    // AI SCRIPT MATCHING ENGINE (Keyword + Semantic Intent Simulation)
+    // =========================================================================
+    function matchScripts(inputText) {
+      const clean = inputText.toLowerCase().trim();
+      if (!clean) return [];
+
+      const tokens = clean.split(/[^a-z0-9']+/).filter(w => w.length > 2);
+      const pool = VIDEO_LIBRARY.filter(v => v.modes.includes(state.mode));
+
+      const scored = pool.map(video => {
+        const hitKeywords = [];
+        let score = 0;
+
+        video.keywords.forEach(kw => {
+          if (clean.includes(kw)) {
+            hitKeywords.push(kw);
+            score += kw.includes(" ") ? 35 : 22;
+          } else {
+            tokens.forEach(tok => {
+              if (kw.includes(tok) && tok.length >= 4 && !hitKeywords.includes(kw)) {
+                hitKeywords.push(kw);
+                score += 12;
+              }
+            });
+          }
+        });
+
+        // Title / category bonus
+        const titleText = (state.mode === "teacher" ? video.teacherTitle : video.title).toLowerCase();
+        tokens.forEach(tok => {
+          if (titleText.includes(tok) && tok.length >= 4) score += 10;
+        });
+
+        const confidence = hitKeywords.length > 0 ? Math.min(98, 72 + score) : 45;
+        return { video, hitKeywords: [...new Set(hitKeywords)], score, confidence };
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+      // Always return top 2 so prototype feels helpful even on novel queries
+      const results = scored.slice(0, 2);
+
+      state.lastMatchTelemetry = {
+        query: inputText,
+        mode: state.mode,
+        topMatch: results[0],
+        scannedCount: 74,
+        latencyMs: 184
+      };
+      renderInvestorInspector();
+      return results;
+    }
+
+    function runSearch(text) {
+      const q = (text !== undefined ? text : state.query).trim();
+      if (!q) return;
+      state.query = q;
+      state.activeVideoId = null;
+      state.isMatching = true;
+      renderPhone();
+
+      setTimeout(() => {
+        state.isMatching = false;
+        state.matchedResults = matchScripts(q);
+        renderPhone();
+      }, 420);
+    }
+
+    // =========================================================================
+    // VOICE INPUT (Web Speech API with graceful prototype fallback)
+    // =========================================================================
+    function toggleVoiceInput() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRec) {
+        if (state.isListening) return;
+        const recognition = new SpeechRec();
+        recognition.lang = "en-US";
+        recognition.interimResults = false;
+        state.isListening = true;
+        renderPhone();
+
+        recognition.onresult = (e) => {
+          const transcript = e.results[0][0].transcript;
+          state.isListening = false;
+          runSearch(transcript);
+        };
+        recognition.onerror = () => {
+          state.isListening = false;
+          // Fallback to a realistic demo transcript if browser blocks mic in iframe
+          const demo = SAMPLE_PROMPTS[state.mode][0];
+          showToast("Mic unavailable in preview — ran sample voice query");
+          runSearch(demo);
+        };
+        recognition.onend = () => {
+          if (state.isListening) {
+            state.isListening = false;
+            renderPhone();
+          }
+        };
+        try {
+          recognition.start();
+        } catch (err) {
+          state.isListening = false;
+          runSearch(SAMPLE_PROMPTS[state.mode][0]);
+        }
+      } else {
+        // Simulate 1.2s voice capture cleanly
+        state.isListening = true;
+        renderPhone();
+        setTimeout(() => {
+          state.isListening = false;
+          const demo = SAMPLE_PROMPTS[state.mode][0];
+          showToast("Voice transcribed");
+          runSearch(demo);
+        }, 1100);
+      }
+    }
+
+    // =========================================================================
+    // VIDEO PLAYER & OPTIONAL WEB SPEECH SYNTHESIS
+    // =========================================================================
+    function openVideo(videoId) {
+      stopPlayback();
+      state.activeVideoId = videoId;
+      state.showSavePicker = false;
+      state.playProgress = 0;
+      renderPhone();
+      // Update inspector if user clicked directly from library/folder
+      const v = VIDEO_LIBRARY.find(x => x.id === videoId);
+      if (v) {
+        state.lastMatchTelemetry = {
+          query: "(Opened directly from library/folder)",
+          mode: state.mode,
+          topMatch: { video: v, hitKeywords: v.keywords.slice(0, 4), confidence: 99 },
+          scannedCount: 74,
+          latencyMs: 42
+        };
+        renderInvestorInspector();
+      }
+    }
+
+    function togglePlay() {
+      if (state.isPlaying) {
+        stopPlayback();
+      } else {
+        state.isPlaying = true;
+        if (state.playProgress >= 100) state.playProgress = 0;
+        if (state.voiceReadAloud) speakCurrentCaption();
+        state.playTimer = setInterval(() => {
+          const prevStep = getCaptionIndex(state.playProgress);
+          state.playProgress += 2;
+          const nextStep = getCaptionIndex(state.playProgress);
+          if (state.voiceReadAloud && nextStep !== prevStep && state.playProgress < 100) {
+            speakCurrentCaption();
+          }
+          if (state.playProgress >= 100) {
+            state.playProgress = 100;
+            stopPlayback();
+          }
+          updatePlayerDOM();
+        }, 350);
+      }
+      updatePlayerDOM();
+    }
+
+    function stopPlayback() {
+      state.isPlaying = false;
+      if (state.playTimer) clearInterval(state.playTimer);
+      state.playTimer = null;
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+
+    function toggleVoiceReadAloud() {
+      state.voiceReadAloud = !state.voiceReadAloud;
+      if (!state.voiceReadAloud && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      } else if (state.voiceReadAloud && state.isPlaying) {
+        speakCurrentCaption();
+      }
+      renderPhone();
+    }
+
+    function speakCurrentCaption() {
+      if (!("speechSynthesis" in window)) return;
+      const v = VIDEO_LIBRARY.find(x => x.id === state.activeVideoId);
+      if (!v) return;
+      const cap = v.captions[getCaptionIndex(state.playProgress)];
+      if (!cap) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(cap.text);
+      utter.rate = 1.02;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function getCaptionIndex(progress) {
+      if (progress < 25) return 0;
+      if (progress < 50) return 1;
+      if (progress < 75) return 2;
+      return 3;
+    }
+
+    function seekPlayer(val) {
+      state.playProgress = Number(val);
+      updatePlayerDOM();
+    }
+
+    function updatePlayerDOM() {
+      const v = VIDEO_LIBRARY.find(x => x.id === state.activeVideoId);
+      if (!v) return;
+      const bar = document.getElementById("videoProgressRange");
+      const capPhase = document.getElementById("captionPhase");
+      const capText = document.getElementById("captionText");
+      const playBtn = document.getElementById("btnPlayToggle");
+      const eq = document.getElementById("avatarEq");
+      const timeEl = document.getElementById("videoTimeReadout");
+
+      const idx = getCaptionIndex(state.playProgress);
+      const cap = v.captions[idx];
+      if (bar) bar.value = state.playProgress;
+      if (capPhase) capPhase.textContent = cap.phase;
+      if (capText) capText.textContent = cap.text;
+      if (eq) eq.className = state.isPlaying ? "flex items-end gap-1 h-6" : "flex items-end gap-1 h-6 paused";
+      if (playBtn) {
+        playBtn.innerHTML = state.isPlaying
+          ? `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg> Pause`
+          : `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> ${state.playProgress > 0 && state.playProgress < 100 ? "Resume" : "Play 3-Min Advice"}`;
+      }
+      if (timeEl) {
+        const totalSec = 180;
+        const curSec = Math.round((state.playProgress / 100) * totalSec);
+        const m = Math.floor(curSec / 60);
+        const s = String(curSec % 60).padStart(2, "0");
+        timeEl.textContent = `${m}:${s} / ${v.duration}`;
+      }
+    }
+
+    // =========================================================================
+    // DOWNLOADABLE STRATEGY SHEET (Real File Download)
+    // =========================================================================
+    function downloadStrategySheet(videoId) {
+      const v = VIDEO_LIBRARY.find(x => x.id === videoId);
+      if (!v) return;
+      const title = state.mode === "teacher" ? v.teacherTitle : v.title;
+      const program = state.mode === "teacher" ? "Superpower Teacher" : "Superpower Parents";
+
+      const htmlDoc = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>${title} — Strategy Sheet | Dr. Kate Ellen</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1B2A30; max-width: 720px; margin: 40px auto; padding: 0 24px; line-height: 1.6; }
+    .header { border-bottom: 3px solid #1E4E5F; padding-bottom: 16px; margin-bottom: 24px; }
+    .badge { display: inline-block; background: #E6F0EC; color: #1E4E5F; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    h1 { color: #163A47; margin: 10px 0 4px; font-size: 24px; }
+    h2 { color: #1E4E5F; font-size: 16px; margin-top: 24px; border-bottom: 1px solid #E2DDD5; padding-bottom: 6px; }
+    .box { background: #FAF8F5; border: 1px solid #E2DDD5; border-radius: 10px; padding: 16px 20px; margin-top: 12px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 8px; }
+    .quote { font-style: italic; color: #5C6F76; margin-top: 32px; border-left: 3px solid #D96B4F; padding-left: 14px; }
+    .footer { margin-top: 36px; font-size: 12px; color: #6E8087; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="badge">${program} • ${v.category} • ${v.ageRange}</span>
+    <h1>${title}</h1>
+    <div style="font-size:13px;color:#5C6F76;">Dr. Kate Ellen — Doctorate in Clinical Psychology | Evidence-Based Strategy &amp; Screening Sheet</div>
+  </div>
+
+  <h2>1. Screening Checklist (What to Look For)</h2>
+  <div class="box">
+    <ul>
+      ${v.checklist.map(c => `<li>&#9744; ${c}</li>`).join("")}
+    </ul>
+  </div>
+
+  <h2>2. Dr. Kate's Immediate Action Strategies</h2>
+  <div class="box">
+    <ol>
+      ${v.strategies.map(s => `<li><strong>Action Step:</strong> ${s}</li>`).join("")}
+    </ol>
+  </div>
+
+  <h2>3. Progress Notes</h2>
+  <div class="box" style="min-height: 90px; color: #8A9A9F;">
+    What worked well this week? What early cues did you notice?
+  </div>
+
+  <p class="quote">"When someone sees beneath the surface, a child's whole world can change." — Dr. Kate Ellen</p>
+  <div class="footer">Generated from ${program} App Prototype • drkateellen.com</div>
+</body>
+</html>`;
+
+      const blob = new Blob([htmlDoc], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `DrKateEllen_${v.id}_StrategySheet.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Strategy Sheet downloaded!");
+    }
+
+    // =========================================================================
+    // FOLDERS (CHILDREN / STUDENTS)
+    // =========================================================================
+    function saveVideoToFolder(folderId, videoId) {
+      const list = state.folders[state.mode];
+      const folder = list.find(f => f.id === folderId);
+      if (!folder) return;
+      const noteInput = document.getElementById("saveNoteInput");
+      const note = noteInput ? noteInput.value.trim() : "";
+
+      const exists = folder.saved.find(s => s.videoId === videoId);
+      if (exists) {
+        if (note) exists.note = note;
+      } else {
+        folder.saved.unshift({ videoId, note: note || "Saved from Dr. Kate's recommendation" });
+      }
+      state.showSavePicker = false;
+      renderPhone();
+      showToast(`Saved to ${folder.name}'s folder`);
+    }
+
+    function addNewFolder() {
+      const nameEl = document.getElementById("newFolderName");
+      const metaEl = document.getElementById("newFolderMeta");
+      const name = nameEl ? nameEl.value.trim() : "";
+      const meta = metaEl ? metaEl.value.trim() : "";
+      if (!name) return;
+
+      const palette = ["#1E4E5F", "#D96B4F", "#2E7D6B", "#8C5E3C"];
+      const list = state.folders[state.mode];
+      list.push({
+        id: "f-" + Date.now(),
+        name,
+        meta: meta || (state.mode === "parents" ? "Child Profile" : "Student Profile"),
+        color: palette[list.length % palette.length],
+        saved: []
+      });
+      renderPhone();
+      showToast(`Created folder for ${name}`);
+    }
+
+    // =========================================================================
+    // WEEKLY REQUESTS
+    // =========================================================================
+    function upvoteRequest(id) {
+      const req = state.weeklyRequests.find(r => r.id === id);
+      if (!req) return;
+      req.voted = !req.voted;
+      req.votes += req.voted ? 1 : -1;
+      renderPhone();
+    }
+
+    function submitWeeklyRequest() {
+      const el = document.getElementById("weeklyReqInput");
+      const text = el ? el.value.trim() : "";
+      if (!text) return;
+      state.weeklyRequests.unshift({ id: Date.now(), topic: text, votes: 1, voted: true });
+      renderPhone();
+      showToast("Topic sent to Dr. Kate's weekly queue!");
+    }
+
+    // =========================================================================
+    // UI HELPERS & NAVIGATION
+    // =========================================================================
+    function setAppMode(mode) {
+      stopPlayback();
+      state.mode = mode;
+      state.activeVideoId = null;
+      state.activeFolderId = null;
+      state.matchedResults = [];
+      state.query = "";
+      updateModeButtons();
+      renderPhone();
+      renderInvestorInspector();
+    }
+
+    function switchTab(tab) {
+      stopPlayback();
+      state.tab = tab;
+      state.activeVideoId = null;
+      state.activeFolderId = null;
+      renderPhone();
+    }
+
+    function toggleChecklist(videoId, idx) {
+      if (!state.checkedItems[videoId]) state.checkedItems[videoId] = {};
+      state.checkedItems[videoId][idx] = !state.checkedItems[videoId][idx];
+      renderPhone();
+    }
+
+    function toggleInvestorPanel() {
+      state.showInvestorPanel = !state.showInvestorPanel;
+      const inv = document.getElementById("investorColumn");
+      const phoneCol = document.getElementById("phoneColumn");
+      const btn = document.getElementById("btnToggleInspector");
+      if (state.showInvestorPanel) {
+        inv.classList.remove("hidden");
+        phoneCol.className = "lg:col-span-5 flex flex-col items-center";
+        btn.textContent = "Hide Investor Panel";
+      } else {
+        inv.classList.add("hidden");
+        phoneCol.className = "lg:col-span-12 flex flex-col items-center";
+        btn.textContent = "Show Investor Panel";
+      }
+    }
+
+    function toggleHeygenScriptModal() {
+      const box = document.getElementById("heygenScriptBox");
+      box.classList.toggle("hidden");
+    }
+
+    function copyHeygenScript() {
+      const text = document.getElementById("heygenScriptText").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById("btnCopyScript");
+        btn.textContent = "Copied!";
+        setTimeout(() => { btn.textContent = "Copy Script"; }, 1800);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("phoneToast");
+      const txt = document.getElementById("phoneToastText");
+      if (!toast || !txt) return;
+      txt.textContent = msg;
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 2300);
+    }
+
+    function updateModeButtons() {
+      const pBtn = document.getElementById("btnModeParents");
+      const tBtn = document.getElementById("btnModeTeacher");
+      const title = document.getElementById("appBrandTitle");
+      const badge = document.getElementById("appLogoBadge");
+      const navLabel = document.getElementById("navFoldersLabel");
+
+      if (state.mode === "parents") {
+        pBtn.style.background = "#1E4E5F"; pBtn.style.color = "#FFFFFF";
+        tBtn.style.background = "transparent"; tBtn.style.color = "var(--muted-foreground)";
+        title.textContent = "Superpower Parents";
+        badge.textContent = "SP";
+        badge.style.background = "#1E4E5F";
+        navLabel.textContent = "Children";
+      } else {
+        tBtn.style.background = "#2E7D6B"; tBtn.style.color = "#FFFFFF";
+        pBtn.style.background = "transparent"; pBtn.style.color = "var(--muted-foreground)";
+        title.textContent = "Superpower Teacher";
+        badge.textContent = "ST";
+        badge.style.background = "#2E7D6B";
+        navLabel.textContent = "Students";
+      }
+    }
+
+    function updateNavStyles() {
+      ["ask", "folders", "weekly", "plan"].forEach(id => {
+        const el = document.getElementById("nav-" + id);
+        if (!el) return;
+        if (state.tab === id) {
+          el.style.color = state.mode === "parents" ? "#1E4E5F" : "#2E7D6B";
+          el.style.background = "#E6F0EC";
+        } else {
+          el.style.color = "#6E8087";
+          el.style.background = "transparent";
+        }
+      });
+    }
+
+    // =========================================================================
+    // RENDER: PHONE SCREENS
+    // =========================================================================
+    function renderPhone() {
+      updateNavStyles();
+      const vp = document.getElementById("phoneViewport");
+
+      // If a video detail is open, show it regardless of tab
+      if (state.activeVideoId) {
+        vp.innerHTML = renderVideoDetailScreen(state.activeVideoId);
+        return;
+      }
+
+      if (state.tab === "ask") {
+        vp.innerHTML = renderAskScreen();
+      } else if (state.tab === "folders") {
+        vp.innerHTML = state.activeFolderId ? renderFolderDetailScreen(state.activeFolderId) : renderFoldersScreen();
+      } else if (state.tab === "weekly") {
+        vp.innerHTML = renderWeeklyScreen();
+      } else if (state.tab === "plan") {
+        vp.innerHTML = renderPlanScreen();
+      }
+    }
+
+    function renderAskScreen() {
+      const isParents = state.mode === "parents";
+      const accent = isParents ? "#1E4E5F" : "#2E7D6B";
+      const prompts = SAMPLE_PROMPTS[state.mode];
+
+      let resultsHTML = "";
+      if (state.isMatching) {
+        resultsHTML = `
+          <div class="rounded-2xl p-4 bg-white border flex items-center gap-3" style="border-color:#E7E2DA;">
+            <div class="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin shrink-0" style="border-color:${accent}; border-top-color:transparent;"></div>
+            <div>
+              <div class="text-xs font-bold" style="color:#163A47;">Scanning Dr. Kate's 70+ vetted scripts…</div>
+              <div class="text-[11px]" style="color:#5C6F76;">Matching keywords &amp; clinical strategies</div>
+            </div>
+          </div>`;
+      } else if (state.matchedResults.length > 0) {
+        resultsHTML = `
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider" style="color:#5C6F76;">Matched Videos from Dr. Kate</span>
+              <button onclick="state.matchedResults=[]; state.query=''; renderPhone();" class="text-[11px] font-semibold underline cursor-pointer" style="color:${accent};">Clear</button>
+            </div>
+            ${state.matchedResults.map((res, i) => {
+              const v = res.video;
+              const vTitle = isParents ? v.title : v.teacherTitle;
+              const vSum = isParents ? v.summary : v.teacherSummary;
+              return `
+                <div onclick="openVideo('${v.id}')" class="rounded-2xl p-3.5 bg-white border shadow-sm hover:shadow-md transition-shadow cursor-pointer space-y-2" style="border-color:${i === 0 ? accent : '#E7E2DA'};">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-md text-white" style="background:${i === 0 ? '#D96B4F' : '#5C6F76'};">
+                      ${i === 0 ? `Best Match • ${res.confidence}%` : `Related • ${res.confidence}%`}
+                    </span>
+                    <span class="text-[11px] font-semibold" style="color:#5C6F76;">${v.duration} • + PDF Sheet</span>
+                  </div>
+                  <div class="text-sm font-bold leading-snug" style="color:#163A47;">${vTitle}</div>
+                  <p class="text-xs leading-relaxed m-0" style="color:#4A5D64;">${vSum}</p>
+                  ${res.hitKeywords.length ? `
+                    <div class="flex flex-wrap gap-1 pt-1">
+                      ${res.hitKeywords.slice(0, 4).map(k => `<span class="text-[10px] font-medium px-2 py-0.5 rounded-full" style="background:#E6F0EC; color:#1E4E5F;">✓ ${k}</span>`).join("")}
+                    </div>` : ""}
+                  <div class="pt-1 flex items-center justify-between text-xs font-semibold" style="color:${accent};">
+                    <span>Watch Dr. Kate's 3-Min Video</span>
+                    <span>→</span>
+                  </div>
+                </div>`;
+            }).join("")}
+          </div>`;
+      } else {
+        resultsHTML = `
+          <div class="space-y-2">
+            <div class="text-[11px] font-bold uppercase tracking-wider" style="color:#5C6F76;">Tap a realistic ${isParents ? "parent" : "teacher"} scenario to test:</div>
+            <div class="space-y-1.5">
+              ${prompts.map(p => `
+                <button onclick="runSearch(\`${p.replace(/`/g, "'")}\`)" class="w-full text-left px-3.5 py-2.5 rounded-xl bg-white border text-xs leading-snug hover:border-[#1E4E5F] transition-colors cursor-pointer flex items-center justify-between gap-2" style="border-color:#E7E2DA; color:#1B2A30;">
+                  <span>"${p}"</span>
+                  <span style="color:${accent};" class="font-bold shrink-0">→</span>
+                </button>`).join("")}
+            </div>
+          </div>`;
+      }
+
+      return `
+        <!-- Hero Voice Card -->
+        <div class="rounded-2xl p-4 text-white space-y-3 shadow-sm" style="background: linear-gradient(145deg, ${accent} 0%, #143642 100%);">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="text-xs font-medium opacity-85">${isParents ? "Immediate support, right when you need it" : "On-demand classroom psychology"}</div>
+              <h2 class="text-base font-bold leading-snug mt-0.5 m-0">
+                ${isParents ? "Tell Dr. Kate what's happening at home" : "Describe the student challenge"}
+              </h2>
+            </div>
+          </div>
+
+          <!-- Voice Mic Button -->
+          <div class="flex items-center gap-3 pt-1">
+            <button onclick="toggleVoiceInput()" class="relative w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-md transition-transform active:scale-95 cursor-pointer ${state.isListening ? 'mic-pulse' : ''}" style="background:#D96B4F;">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            </button>
+            <div class="text-xs leading-snug">
+              <div class="font-semibold">${state.isListening ? "Listening… speak naturally" : "Tap & speak your issue"}</div>
+              <div class="opacity-80 mt-0.5">AI scans Dr. Kate's scripts and sends her matched video + strategy sheet.</div>
+            </div>
+          </div>
+
+          <!-- Text Input Bar -->
+          <form onsubmit="event.preventDefault(); runSearch(document.getElementById('askInput').value);" class="flex gap-1.5 pt-1">
+            <input id="askInput" type="text" value="${state.query.replace(/"/g, '&quot;')}" placeholder="${isParents ? 'Or type: meltdowns, screens, anxiety...' : 'Or type: ADHD focus, sensory, parent...'}" class="flex-1 px-3 py-2 rounded-xl text-xs bg-white/95 text-[#1B2A30] placeholder-[#7B8B91] focus:outline-none" />
+            <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-bold text-white cursor-pointer" style="background:#D96B4F;">
+              Find
+            </button>
+          </form>
+        </div>
+
+        ${resultsHTML}
+      `;
+    }
+
+    function renderVideoDetailScreen(videoId) {
+      const v = VIDEO_LIBRARY.find(x => x.id === videoId);
+      if (!v) return "";
+      const isParents = state.mode === "parents";
+      const accent = isParents ? "#1E4E5F" : "#2E7D6B";
+      const title = isParents ? v.title : v.teacherTitle;
+      const cap = v.captions[getCaptionIndex(state.playProgress)];
+      const checkedMap = state.checkedItems[videoId] || {};
+      const checkedCount = Object.values(checkedMap).filter(Boolean).length;
+      const folders = state.folders[state.mode];
+
+      return `
+        <!-- Back Bar -->
+        <div class="flex items-center justify-between">
+          <button onclick="stopPlayback(); state.activeVideoId=null; renderPhone();" class="text-xs font-semibold flex items-center gap-1 cursor-pointer" style="color:${accent};">
+            ← Back
+          </button>
+          <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md" style="background:#E6F0EC; color:${accent};">${v.category} • ${v.ageRange}</span>
+        </div>
+
+        <!-- HeyGen-Ready AI Avatar Video Player -->
+        <div class="rounded-2xl overflow-hidden shadow-md border" style="background:#142830; border-color:#1E4E5F;">
+          <!-- Video Stage -->
+          <div class="relative p-4 pb-3 text-white space-y-3" style="background: radial-gradient(circle at 80% 20%, #2B6273 0%, #142830 75%);">
+            <div class="flex items-center justify-between text-[10px]">
+              <span class="px-2 py-0.5 rounded-full bg-white/15 font-medium backdrop-blur-sm">HeyGen AI Avatar Ready • ${v.duration}</span>
+              <button onclick="toggleVoiceReadAloud()" class="px-2 py-0.5 rounded-full font-medium cursor-pointer transition-colors ${state.voiceReadAloud ? 'bg-[#D96B4F] text-white' : 'bg-white/15 text-white/85'}">
+                ${state.voiceReadAloud ? "🔊 Voice On" : "🔇 Audio Preview"}
+              </button>
+            </div>
+
+            <!-- Presenter Avatar Representation -->
+            <div class="flex items-center gap-3.5 py-1">
+              <div class="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 relative border-2 border-white/25 overflow-hidden" style="background: linear-gradient(135deg, #E8DFD5 0%, #D4C5B4 100%);">
+                <svg class="w-14 h-14 mt-2" viewBox="0 0 64 64" fill="none">
+                  <circle cx="32" cy="22" r="11" fill="#1E4E5F"/>
+                  <path d="M14 56c0-10 8-17 18-17s18 7 18 17" fill="#1E4E5F"/>
+                  <circle cx="32" cy="21" r="9.5" fill="#F2D3BC"/>
+                  <path d="M22 20c1-8 19-9 20 0-3-4-17-4-20 0z" fill="#6B4C3B"/>
+                  <path d="M27 25c2 2 8 2 10 0" stroke="#9E6248" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-bold">Dr. Kate Ellen</div>
+                <div class="text-[11px] opacity-80">Doctorate in Clinical Psychology</div>
+                <div id="avatarEq" class="flex items-end gap-1 h-6 mt-1 ${state.isPlaying ? '' : 'paused'}">
+                  <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+                  <span class="text-[10px] opacity-75 ml-1.5">AI Twin Script Sync</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Synchronized Captions -->
+            <div class="rounded-xl p-2.5 bg-black/35 border border-white/10 space-y-1">
+              <div id="captionPhase" class="text-[10px] font-bold uppercase tracking-wider" style="color:#F4C095;">${cap.phase}</div>
+              <p id="captionText" class="text-xs leading-relaxed m-0 text-white/95">${cap.text}</p>
+            </div>
+
+            <!-- Controls & Scrubber -->
+            <div class="space-y-1.5">
+              <input id="videoProgressRange" type="range" min="0" max="100" value="${state.playProgress}" oninput="seekPlayer(this.value)" class="w-full h-1.5 accent-[#D96B4F] cursor-pointer" />
+              <div class="flex items-center justify-between">
+                <button id="btnPlayToggle" onclick="togglePlay()" class="px-3 py-1.5 rounded-lg text-xs font-bold text-white flex items-center gap-1.5 cursor-pointer" style="background:#D96B4F;">
+                  ${state.isPlaying
+                    ? `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg> Pause`
+                    : `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Play 3-Min Advice`}
+                </button>
+                <span id="videoTimeReadout" class="text-[11px] font-mono opacity-80">0:00 / ${v.duration}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Title & Primary Actions -->
+        <div class="space-y-2.5">
+          <h2 class="text-base font-bold leading-snug m-0" style="color:#163A47;">${title}</h2>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="downloadStrategySheet('${v.id}')" class="px-3 py-2.5 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 cursor-pointer shadow-sm" style="background:${accent};">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Strategy Sheet
+            </button>
+            <button onclick="state.showSavePicker=!state.showSavePicker; renderPhone();" class="px-3 py-2.5 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 cursor-pointer bg-white" style="border-color:${accent}; color:${accent};">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+              Save to ${isParents ? "Child" : "Student"}
+            </button>
+          </div>
+
+          <!-- Inline Save-to-Folder Picker -->
+          ${state.showSavePicker ? `
+            <div class="rounded-2xl p-3.5 bg-white border space-y-2.5 shadow-sm" style="border-color:${accent};">
+              <div class="text-xs font-bold" style="color:#163A47;">Save to ${isParents ? "Child" : "Student"} Folder:</div>
+              <input id="saveNoteInput" type="text" placeholder="Optional note (e.g., Tried step 1 today...)" class="w-full px-3 py-2 rounded-lg text-xs border" style="border-color:#D8D2C8;" />
+              <div class="space-y-1.5">
+                ${folders.map(f => `
+                  <button onclick="saveVideoToFolder('${f.id}', '${v.id}')" class="w-full px-3 py-2 rounded-xl border text-left text-xs font-semibold flex items-center justify-between hover:bg-[#FAF8F5] cursor-pointer" style="border-color:#E7E2DA;">
+                    <span class="flex items-center gap-2">
+                      <span class="w-6 h-6 rounded-full text-white text-[11px] flex items-center justify-center font-bold" style="background:${f.color};">${f.name[0]}</span>
+                      <span>${f.name} <span class="font-normal text-[#6E8087]">(${f.meta})</span></span>
+                    </span>
+                    <span style="color:${accent};">+ Save</span>
+                  </button>`).join("")}
+              </div>
+            </div>` : ""}
+        </div>
+
+        <!-- Screening Checklist -->
+        <div class="rounded-2xl p-3.5 bg-white border space-y-2.5" style="border-color:#E7E2DA;">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold" style="color:#163A47;">Screening Checklist</span>
+            <span class="text-[11px] font-semibold" style="color:${accent};">${checkedCount}/${v.checklist.length} spotted</span>
+          </div>
+          <div class="space-y-2">
+            ${v.checklist.map((item, idx) => `
+              <label class="flex items-start gap-2.5 text-xs cursor-pointer leading-snug" style="color:#374A51;">
+                <input type="checkbox" ${checkedMap[idx] ? "checked" : ""} onchange="toggleChecklist('${v.id}', ${idx})" class="mt-0.5 accent-[#1E4E5F]" />
+                <span>${item}</span>
+              </label>`).join("")}
+          </div>
+        </div>
+
+        <!-- Dr. Kate's Vetted Strategies -->
+        <div class="rounded-2xl p-3.5 bg-white border space-y-2" style="border-color:#E7E2DA;">
+          <div class="text-xs font-bold" style="color:#163A47;">Immediate Strategies (Dr. Kate Vetted)</div>
+          <ol class="pl-4 m-0 space-y-1.5 text-xs leading-relaxed" style="color:#374A51;">
+            ${v.strategies.map(s => `<li>${s}</li>`).join("")}
+          </ol>
+        </div>
+      `;
+    }
+
+    function renderFoldersScreen() {
+      const isParents = state.mode === "parents";
+      const accent = isParents ? "#1E4E5F" : "#2E7D6B";
+      const folders = state.folders[state.mode];
+
+      return `
+        <div class="space-y-1">
+          <h2 class="text-base font-bold m-0" style="color:#163A47;">${isParents ? "My Children's Libraries" : "My Student Folders"}</h2>
+          <p class="text-xs m-0" style="color:#5C6F76;">
+            ${isParents ? "Keep videos, strategy sheets, and progress notes organized separately for each child." : "Track which videos and classroom strategies work best for each individual student."}
+          </p>
+        </div>
+
+        <div class="space-y-2.5">
+          ${folders.map(f => `
+            <div onclick="state.activeFolderId='${f.id}'; renderPhone();" class="rounded-2xl p-3.5 bg-white border shadow-sm hover:border-[#1E4E5F] transition-colors cursor-pointer flex items-center justify-between gap-3" style="border-color:#E7E2DA;">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl text-white font-bold text-base flex items-center justify-center shrink-0" style="background:${f.color};">
+                  ${f.name[0]}
+                </div>
+                <div>
+                  <div class="text-sm font-bold" style="color:#163A47;">${f.name}</div>
+                  <div class="text-xs" style="color:#5C6F76;">${f.meta}</div>
+                  <div class="text-[11px] font-semibold mt-0.5" style="color:${accent};">${f.saved.length} saved video${f.saved.length === 1 ? "" : "s"} &amp; sheets</div>
+                </div>
+              </div>
+              <span class="text-lg font-bold" style="color:#9BA9AE;">›</span>
+            </div>`).join("")}
+        </div>
+
+        <!-- Add New Child / Student Form -->
+        <div class="rounded-2xl p-3.5 bg-white border space-y-2.5" style="border-color:#E7E2DA;">
+          <div class="text-xs font-bold" style="color:#163A47;">+ Create New ${isParents ? "Child" : "Student"} Folder</div>
+          <div class="grid grid-cols-2 gap-2">
+            <input id="newFolderName" type="text" placeholder="${isParents ? 'Child name' : 'Student name'}" class="px-3 py-2 rounded-lg text-xs border" style="border-color:#D8D2C8;" />
+            <input id="newFolderMeta" type="text" placeholder="${isParents ? 'Age / Year' : 'Year / Support note'}" class="px-3 py-2 rounded-lg text-xs border" style="border-color:#D8D2C8;" />
+          </div>
+          <button onclick="addNewFolder()" class="w-full py-2 rounded-xl text-xs font-bold text-white cursor-pointer" style="background:${accent};">
+            Add ${isParents ? "Child" : "Student"} Folder
+          </button>
+        </div>
+      `;
+    }
+
+    function renderFolderDetailScreen(folderId) {
+      const isParents = state.mode === "parents";
+      const accent = isParents ? "#1E4E5F" : "#2E7D6B";
+      const folder = state.folders[state.mode].find(f => f.id === folderId);
+      if (!folder) return "";
+
+      return `
+        <button onclick="state.activeFolderId=null; renderPhone();" class="text-xs font-semibold flex items-center gap-1 cursor-pointer" style="color:${accent};">
+          ← All ${isParents ? "Children" : "Students"}
+        </button>
+
+        <div class="rounded-2xl p-4 text-white flex items-center gap-3" style="background:${folder.color};">
+          <div class="w-12 h-12 rounded-2xl bg-white/20 font-bold text-lg flex items-center justify-center">${folder.name[0]}</div>
+          <div>
+            <div class="text-base font-bold">${folder.name}'s Library</div>
+            <div class="text-xs opacity-85">${folder.meta} • ${folder.saved.length} saved resources</div>
+          </div>
+        </div>
+
+        ${folder.saved.length === 0 ? `
+          <div class="rounded-2xl p-5 bg-white border text-center space-y-2" style="border-color:#E7E2DA;">
+            <div class="text-xs font-semibold" style="color:#163A47;">No videos saved yet</div>
+            <p class="text-xs m-0" style="color:#5C6F76;">Use "Ask Kate" to find a video and save it directly to ${folder.name}'s folder.</p>
+            <button onclick="switchTab('ask')" class="px-4 py-2 rounded-xl text-xs font-bold text-white cursor-pointer" style="background:${accent};">Ask Dr. Kate</button>
+          </div>
+        ` : `
+          <div class="space-y-2.5">
+            ${folder.saved.map(item => {
+              const v = VIDEO_LIBRARY.find(x => x.id === item.videoId);
+              if (!v) return "";
+              const vTitle = isParents ? v.title : v.teacherTitle;
+              return `
+                <div class="rounded-2xl p-3.5 bg-white border space-y-2" style="border-color:#E7E2DA;">
+                  <div class="flex items-center justify-between text-[11px]" style="color:#5C6F76;">
+                    <span class="font-semibold" style="color:${accent};">${v.category}</span>
+                    <span>${v.duration}</span>
+                  </div>
+                  <div class="text-sm font-bold" style="color:#163A47;">${vTitle}</div>
+                  ${item.note ? `<div class="text-xs px-2.5 py-1.5 rounded-lg" style="background:#FAF8F5; color:#4A5D64;">📝 ${item.note}</div>` : ""}
+                  <div class="flex gap-2 pt-1">
+                    <button onclick="openVideo('${v.id}')" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-white cursor-pointer" style="background:${accent};">Watch</button>
+                    <button onclick="downloadStrategySheet('${v.id}')" class="flex-1 py-1.5 rounded-lg text-xs font-bold border cursor-pointer" style="border-color:${accent}; color:${accent};">PDF Sheet</button>
+                  </div>
+                </div>`;
+            }).join("")}
+          </div>
+        `}
+      `;
+    }
+
+    function renderWeeklyScreen() {
+      const isParents = state.mode === "parents";
+      const accent = isParents ? "#1E4E5F" : "#2E7D6B";
+      const featured = VIDEO_LIBRARY.find(v => v.modes.includes(state.mode) && v.isNewThisWeek) || VIDEO_LIBRARY[0];
+      const fTitle = isParents ? featured.title : featured.teacherTitle;
+      const pool = VIDEO_LIBRARY.filter(v => v.modes.includes(state.mode));
+
+      return `
+        <!-- Weekly Drop Notification Banner -->
+        <div class="rounded-2xl p-4 text-white space-y-2.5 shadow-sm" style="background: linear-gradient(135deg, #D96B4F 0%, #B85239 100%);">
+          <div class="flex items-center justify-between text-[11px] font-semibold">
+            <span class="px-2 py-0.5 rounded-full bg-white/20">NEW THIS WEEK • EP #75</span>
+            <span>Push + Email Sent</span>
+          </div>
+          <div class="text-base font-bold leading-snug">${fTitle}</div>
+          <p class="text-xs opacity-90 m-0 leading-relaxed">Created from last week's top community request using Dr. Kate's AI studio workflow.</p>
+          <button onclick="openVideo('${featured.id}')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white cursor-pointer" style="color:#B85239;">
+            Watch New Release (${featured.duration}) →
+          </button>
+        </div>
+
+        <!-- Request Next Week's Video -->
+        <div class="rounded-2xl p-3.5 bg-white border space-y-2.5" style="border-color:#E7E2DA;">
+          <div>
+            <div class="text-xs font-bold" style="color:#163A47;">Vote or Request Next Week's Video</div>
+            <div class="text-[11px]" style="color:#5C6F76;">Dr. Kate releases 1 new video every week driven by member requests.</div>
+          </div>
+          <div class="space-y-1.5">
+            ${state.weeklyRequests.map(r => `
+              <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-xs" style="border-color:#E7E2DA;">
+                <span style="color:#1B2A30;">${r.topic}</span>
+                <button onclick="upvoteRequest(${r.id})" class="px-2 py-1 rounded-lg text-[11px] font-bold shrink-0 cursor-pointer" style="background:${r.voted ? accent : '#E6F0EC'}; color:${r.voted ? '#FFF' : accent};">
+                  ▲ ${r.votes}
+                </button>
+              </div>`).join("")}
+          </div>
+          <form onsubmit="event.preventDefault(); submitWeeklyRequest();" class="flex gap-1.5 pt-1">
+            <input id="weeklyReqInput" type="text" placeholder="Suggest a topic for next week..." class="flex-1 px-3 py-2 rounded-lg text-xs border" style="border-color:#D8D2C8;" />
+            <button type="submit" class="px-3 py-2 rounded-lg text-xs font-bold text-white cursor-pointer" style="background:${accent};">Request</button>
+          </form>
+        </div>
+
+        <!-- Quick Browse Library -->
+        <div class="space-y-2">
+          <div class="text-xs font-bold uppercase tracking-wider" style="color:#5C6F76;">Sample Topics (70+ in Full Library)</div>
+          <div class="space-y-1.5">
+            ${pool.map(v => `
+              <button onclick="openVideo('${v.id}')" class="w-full text-left px-3.5 py-2.5 rounded-xl bg-white border flex items-center justify-between gap-2 cursor-pointer hover:border-[#1E4E5F]" style="border-color:#E7E2DA;">
+                <div>
+                  <div class="text-xs font-bold" style="color:#163A47;">${isParents ? v.title : v.teacherTitle}</div>
+                  <div class="text-[11px]" style="color:#5C6F76;">${v.category} • ${v.duration}</div>
+                </div>
+                <span style="color:${accent};" class="text-xs font-bold">Play</span>
+              </button>`).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPlanScreen() {
+      const isParents = state.mode === "parents";
+      const accent = isParents ? "#1E4E5F" : "#2E7D6B";
+
+      return `
+        <div class="rounded-2xl p-4 text-white space-y-2" style="background:${accent};">
+          <div class="text-[11px] font-semibold uppercase tracking-wider opacity-80">${isParents ? "Annual Family Membership" : "Annual School License"}</div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-2xl font-bold">${isParents ? "$149" : "School Tier"}</span>
+            <span class="text-xs opacity-85">${isParents ? "/ year (less than 1 therapy session)" : "• 12-month staff + parent access"}</span>
+          </div>
+          <p class="text-xs opacity-90 m-0">Ongoing value every week—never struggle alone for months waiting for a specialist appointment.</p>
+        </div>
+
+        <div class="rounded-2xl p-4 bg-white border space-y-2.5" style="border-color:#E7E2DA;">
+          <div class="text-xs font-bold" style="color:#163A47;">Included in Your Yearly Subscription</div>
+          <ul class="space-y-2 text-xs m-0 pl-0 list-none" style="color:#374A51;">
+            <li class="flex items-start gap-2"><span style="color:#2E7D6B;">✓</span><span><strong>Instant Voice-to-Video Support:</strong> Speak your challenge and get Dr. Kate's matched 3-minute advice immediately.</span></li>
+            <li class="flex items-start gap-2"><span style="color:#2E7D6B;">✓</span><span><strong>70+ Existing Videos + 52 New/Year:</strong> 1 new customer-requested video &amp; strategy sheet every week.</span></li>
+            <li class="flex items-start gap-2"><span style="color:#2E7D6B;">✓</span><span><strong>Unlimited ${isParents ? "Child" : "Student"} Folders:</strong> Organize videos, checklists, and notes separately per ${isParents ? "child" : "student"}.</span></li>
+            <li class="flex items-start gap-2"><span style="color:#2E7D6B;">✓</span><span><strong>Downloadable Strategy Sheets:</strong> Printable checklists &amp; step-by-step action guides for every video.</span></li>
+          </ul>
+          <button onclick="showToast('Annual subscription flow ready for Stripe / App Store!')" class="w-full py-2.5 rounded-xl text-xs font-bold text-white cursor-pointer mt-1" style="background:#D96B4F;">
+            ${isParents ? "Start 7-Day Free Trial →" : "Book a School Demo →"}
+          </button>
+        </div>
+
+        <div class="rounded-2xl p-3.5 bg-white border text-xs space-y-1" style="border-color:#E7E2DA; color:#5C6F76;">
+          <div class="font-bold" style="color:#163A47;">Weekly Release Notifications</div>
+          <div class="flex items-center justify-between pt-1">
+            <span>Push &amp; Email alerts for new videos</span>
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold" style="background:#E6F0EC; color:#1E4E5F;">Enabled</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // RENDER: INVESTOR LIVE TELEMETRY INSPECTOR
+    // =========================================================================
+    function renderInvestorInspector() {
+      const box = document.getElementById("inspectorOutput");
+      if (!box) return;
+
+      if (!state.lastMatchTelemetry) {
+        box.innerHTML = `
+          <div class="text-xs text-[var(--muted-foreground)] flex items-center justify-between">
+            <span>Waiting for a voice or text query in the mobile prototype… Tap any sample scenario on the left to watch live script routing.</span>
+            <span class="font-mono text-[11px] px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">Idle</span>
+          </div>`;
+        return;
+      }
+
+      const t = state.lastMatchTelemetry;
+      const v = t.topMatch.video;
+      const vTitle = t.mode === "teacher" ? v.teacherTitle : v.title;
+
+      box.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span class="font-semibold text-[var(--foreground)]">Input Captured (${t.mode === "parents" ? "Parent" : "Teacher"}):</span>
+          <span class="font-mono text-[11px] text-[var(--muted-foreground)]">Scanned ${t.scannedCount} vetted scripts in ${t.latencyMs}ms</span>
+        </div>
+        <div class="text-xs italic px-3 py-2 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">
+          "${t.query}"
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="space-y-1">
+            <div class="text-[11px] font-mono uppercase text-[var(--muted-foreground)]">Extracted Script Keywords</div>
+            <div class="flex flex-wrap gap-1.5">
+              ${(t.topMatch.hitKeywords.length ? t.topMatch.hitKeywords : ["general support"]).map(k =>
+                `<span class="px-2 py-0.5 rounded-md font-mono text-[11px] bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">${k}</span>`
+              ).join("")}
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="text-[11px] font-mono uppercase text-[var(--muted-foreground)]">Routed Clinical Asset</div>
+            <div class="font-semibold text-[var(--foreground)]">${vTitle}</div>
+            <div class="text-[11px] text-[var(--muted-foreground)]">Match Score: ${t.topMatch.confidence}% • Zero AI hallucination risk</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Init
+    updateModeButtons();
+    renderPhone();
+    renderInvestorInspector();
+  </script>
+</body>
+</html>
